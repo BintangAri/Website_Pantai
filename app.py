@@ -104,7 +104,7 @@ def halaman_login():
             if validate_login(username, password):
                 st.session_state["gapura_open"] = True
                 st.session_state["username_temp"] = username
-                st.experimental_rerun()
+                st.rerun()  # dulu: st.experimental_rerun()
             else:
                 st.error("❌ Username atau password salah!")
 
