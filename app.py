@@ -1,13 +1,17 @@
 import os
-import psycopg2 
+import base64
+import time
 import numpy as np
 import streamlit as st
 import tensorflow as tf
-from tensorflow.keras.preprocessing import image
-from psycopg2 import sql
 from PIL import Image
-import time
-import base64
+from tensorflow.keras.preprocessing import image
+from supabase import create_client, Client
+
+# ======== Setup Supabase ========
+supabase_url = st.secrets["SUPABASE_URL"]
+supabase_key = st.secrets["SUPABASE_KEY"]
+supabase: Client = create_client(supabase_url, supabase_key)
 
 # ======== Lokasi Pantai & Deskripsi ========
 lokasi_pantai = {
@@ -34,52 +38,16 @@ penjelasan_pantai = {
     "Pantai Blue Lagoon": "Air biru jernih, spot ikan tropis, dan perairan tenang membuat pantai ini ideal untuk snorkeling pemula."
 }
 
-# ======== Database ========
-DB_CONFIG = {
-    "host": st.secrets["DB_HOST"],
-    "port": st.secrets["DB_PORT"],
-    "dbname": st.secrets["DB_NAME"],
-    "user": st.secrets["DB_USER"],
-    "password": st.secrets["DB_PASSWORD"]
-}
-def get_connection():
-    return psycopg2.connect(**DB_CONFIG)
-
-def init_db():
-    conn = get_connection()
-    c = conn.cursor()
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            username TEXT PRIMARY KEY,
-            password TEXT NOT NULL
-        );
-    """)
-    conn.commit()
-    conn.close()
-
+# ======== Fungsi Autentikasi ========
 def register_user(username, password):
-    conn = get_connection()
-    c = conn.cursor()
-    try:
-        c.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
-        conn.commit()
-        return True
-    except psycopg2.IntegrityError:
-        conn.rollback()
-        return False
-    finally:
-        conn.close()
-
+    response = supabase.table("users").insert({"username": username, "password": password}).execute()
+    return response.status_code == 201
 
 def validate_login(username, password):
-    conn = get_connection()
-    c = conn.cursor()
-    c.execute("SELECT * FROM users WHERE username=%s AND password=%s", (username, password))
-    result = c.fetchone()
-    conn.close()
-    return result is not None
+    result = supabase.table("users").select("*").eq("username", username).eq("password", password).execute()
+    return len(result.data) > 0
 
-
+# ======== Utils ========
 def img_to_base64(file_path):
     with open(file_path, "rb") as img_file:
         return base64.b64encode(img_file.read()).decode()
@@ -113,11 +81,9 @@ def halaman_login():
 
     col1, col2, col3 = st.columns([2, 2, 2])
     with col1:
-        st.markdown(f"""
-            <div class="container-gapura">
-                <img src="data:image/png;base64,{kiri_base64}" class="gapura-img gapura-kiri {'geser' if st.session_state['gapura_open'] else ''}">
-            </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f"""<div class="container-gapura">
+            <img src="data:image/png;base64,{kiri_base64}" class="gapura-img gapura-kiri {'geser' if st.session_state['gapura_open'] else ''}">
+        </div>""", unsafe_allow_html=True)
 
     with col2:
         st.markdown('<div class="login-box">', unsafe_allow_html=True)
@@ -140,11 +106,9 @@ def halaman_login():
         st.markdown('</div>', unsafe_allow_html=True)
 
     with col3:
-        st.markdown(f"""
-            <div class="container-gapura">
-                <img src="data:image/png;base64,{kanan_base64}" class="gapura-img gapura-kanan {'geser' if st.session_state['gapura_open'] else ''}">
-            </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f"""<div class="container-gapura">
+            <img src="data:image/png;base64,{kanan_base64}" class="gapura-img gapura-kanan {'geser' if st.session_state['gapura_open'] else ''}">
+        </div>""", unsafe_allow_html=True)
 
 # ======== Halaman Registrasi ========
 def halaman_registrasi():
@@ -162,10 +126,10 @@ def halaman_registrasi():
     if st.button("⬅️ Kembali ke Login"):
         st.session_state["page"] = "login"
         st.rerun()
-# ======== Halaman Utama========
+
+# ======== Halaman Utama ========
 def halaman_utama():
     st.title("🌴 Selamat Datang di Aplikasi Rekomendasi Pantai Bali 🏖️")
-
     st.markdown("""
         <div style="text-align: justify; font-size: 18px;">
             Aplikasi ini menggunakan teknologi <b>Artificial Intelligence</b> untuk merekomendasikan kategori pantai
@@ -174,12 +138,6 @@ def halaman_utama():
         </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("### 🔍 Fitur Utama:")
-    st.markdown("""
-    - 📷 <b>Klasifikasi Pantai</b>: Upload foto pantai untuk mengetahui kategorinya (Family, Surfing, atau Snorkeling).
-    - 📍 <b>Rekomendasi Lokasi</b>: Dapatkan pantai terbaik sesuai kategori, lengkap dengan tautan Google Maps.
-    - ℹ️ <b>Informasi Pantai</b>: Pelajari lebih lanjut tentang setiap kategori pantai melalui gambar dan deskripsi.
-    """, unsafe_allow_html=True)
 # ======== Halaman Klasifikasi Pantai ========
 def halaman_klasifikasi():
     st.title("🏖️ Rekomendasi Pantai dari Foto")
@@ -196,7 +154,7 @@ def halaman_klasifikasi():
         'Pantai Snorkeling': ['Pantai Amed', 'Pantai Tulamben', 'Pantai Blue Lagoon']
     }
 
-    uploaded_file = st.file_uploader("Upload foto pantai atau aktivitas di pantaimu", type=["jpg", "jpeg", "png"])
+    uploaded_file = st.file_uploader("Upload foto pantai", type=["jpg", "jpeg", "png"])
     if uploaded_file:
         if uploaded_file.size > 5 * 1024 * 1024:
             st.error("❌ Ukuran gambar terlalu besar! Maksimal 5MB.")
@@ -214,12 +172,10 @@ def halaman_klasifikasi():
         for pantai in rekomendasi_tempat[label]:
             st.markdown(f"### {pantai}")
             st.write(penjelasan_pantai.get(pantai, "Tidak ada deskripsi."))
-            query = pantai.replace(" ", "+")
-            url = f"https://www.google.com/maps/search/?api=1&query={query}"
+            url = f"https://www.google.com/maps/search/?api=1&query={pantai.replace(' ', '+')}"
             st.markdown(f"""<a href="{url}" target="_blank">
-                <button style="background:#444;color:white;padding:6px 12px;border:none;border-radius:5px;">📍 Cari {pantai} di Google Maps</button></a>""",
-                unsafe_allow_html=True)
-
+                <button style="background:#444;color:white;padding:6px 12px;border:none;border-radius:5px;">
+                📍 Cari {pantai} di Google Maps</button></a>""", unsafe_allow_html=True)
 # ======== Halaman Penjelasan ========
 def halaman_penjelasan():
     st.title("📚 Kategori Pantai di Bali")
@@ -283,10 +239,7 @@ def halaman_penjelasan():
         st.write(info["deskripsi"])
         if st.button("⬅️ Kembali"):
             st.session_state["kategori_terpilih"] = None
-
 # ======== Routing Utama ========
-init_db()
-
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
 if "username" not in st.session_state:
@@ -309,20 +262,16 @@ if st.session_state["gapura_open"]:
 if st.session_state["logged_in"]:
     with st.sidebar:
         st.markdown(f"👤 **{st.session_state['username']}**")
-        halaman = st.radio("Navigasi", ["🏠 Beranda", "📷 Klasifikasi", "ℹ️ Penjelasan"])
+        halaman = st.radio("Navigasi", ["🏠 Beranda", "📷 Klasifikasi"])
         if st.button("🚪 Logout"):
             st.session_state["logged_in"] = False
             st.session_state["username"] = ""
             st.session_state["page"] = "login"
             st.rerun()
-
     if halaman == "🏠 Beranda":
         halaman_utama()
     elif halaman == "📷 Klasifikasi":
         halaman_klasifikasi()
-    elif halaman == "ℹ️ Penjelasan":
-        halaman_penjelasan()
-
 else:
     if st.session_state["page"] == "login":
         halaman_login()
