@@ -1,5 +1,5 @@
-streamlit==1.35.0
-tensorflow==2.16.1
-psycopg2-binary
-Pillow
+streamlit
+tensorflow==2.10.1
 numpy
+Pillow
+psycopg2-binary
