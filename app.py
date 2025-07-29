@@ -153,7 +153,7 @@ def halaman_klasifikasi():
 
     @st.cache_resource
     def load_model():
-        return tf.keras.models.load_model("model_fix.keras")
+        tf.keras.models.load_model("saved_model")
     model = load_model()
     class_names = ['Pantai Family', 'Pantai Surfing', 'Pantai Snorkeling']
     rekomendasi_tempat = {
