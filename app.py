@@ -7,6 +7,7 @@ import tensorflow as tf
 from PIL import Image
 from tensorflow.keras.preprocessing import image
 from supabase import create_client, Client
+from postgrest.exceptions import APIError  
 
 # ======== Setup Supabase ========
 supabase_url = st.secrets["SUPABASE_URL"]
@@ -40,8 +41,14 @@ penjelasan_pantai = {
 
 # ======== Fungsi Autentikasi ========
 def register_user(username, password):
-    response = supabase.table("users").insert({"username": username, "password": password}).execute()
-    return response.error is None
+    try:
+        response = supabase.table("users").insert({"username": username, "password": password}).execute()
+        return True
+    except APIError as e:
+        if e.message and "duplicate key value" in e.message:
+            return False
+        else:
+            raise e  # biar error selain duplikat tetap muncul
 
 
 def validate_login(username, password):
