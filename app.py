@@ -104,14 +104,14 @@ def halaman_login():
             if validate_login(username, password):
                 st.session_state["gapura_open"] = True
                 st.session_state["username_temp"] = username
-                st.rerun()  # dulu: st.experimental_rerun()
+                st.experimental_rerun()  # dulu: st.experimental_rerun()
             else:
                 st.error("❌ Username atau password salah!")
 
         st.markdown("Belum punya akun?")
         if st.button("➡️ Daftar Sekarang"):
             st.session_state["page"] = "register"
-            st.rerun()
+            st.experimental_rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
     with col3:
@@ -128,13 +128,13 @@ def halaman_registrasi():
         if register_user(new_user, new_pass):
             st.success("✅ Registrasi berhasil! Silakan login.")
             st.session_state["page"] = "login"
-            st.rerun()
+            st.experimental_rerun()
         else:
             st.warning("⚠️ Username sudah digunakan.")
     st.markdown("Sudah punya akun?")
     if st.button("⬅️ Kembali ke Login"):
         st.session_state["page"] = "login"
-        st.rerun()
+        st.experimental_rerun()
 
 # ======== Halaman Utama ========
 def halaman_utama():
@@ -266,7 +266,7 @@ if st.session_state["gapura_open"]:
     st.session_state["username"] = st.session_state["username_temp"]
     st.session_state["page"] = "main"
     st.session_state["gapura_open"] = False
-    st.rerun()
+    st.experimental_rerun()
 
 if st.session_state["logged_in"]:
     with st.sidebar:
@@ -276,7 +276,7 @@ if st.session_state["logged_in"]:
             st.session_state["logged_in"] = False
             st.session_state["username"] = ""
             st.session_state["page"] = "login"
-            st.rerun()
+            st.experimental_rerun()
     if halaman == "🏠 Beranda":
         halaman_utama()
     elif halaman == "📷 Klasifikasi":
