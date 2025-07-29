@@ -36,11 +36,11 @@ penjelasan_pantai = {
 
 # ======== Database ========
 DB_CONFIG = {
-    "host": os.environ.get("DB_HOST"),
-    "port": os.environ.get("DB_PORT"),
-    "dbname": os.environ.get("DB_NAME"),
-    "user": os.environ.get("DB_USER"),
-    "password": os.environ.get("DB_PASSWORD")
+    "host": st.secrets["DB_HOST"],
+    "port": st.secrets["DB_PORT"],
+    "dbname": st.secrets["DB_NAME"],
+    "user": st.secrets["DB_USER"],
+    "password": st.secrets["DB_PASSWORD"]
 }
 def get_connection():
     return psycopg2.connect(**DB_CONFIG)
@@ -285,7 +285,6 @@ def halaman_penjelasan():
             st.session_state["kategori_terpilih"] = None
 
 # ======== Routing Utama ========
-init_db()
 init_db()
 
 if "logged_in" not in st.session_state:
