@@ -41,11 +41,13 @@ penjelasan_pantai = {
 # ======== Fungsi Autentikasi ========
 def register_user(username, password):
     response = supabase.table("users").insert({"username": username, "password": password}).execute()
-    return response.status_code == 201
+    return response.error is None
+
 
 def validate_login(username, password):
     result = supabase.table("users").select("*").eq("username", username).eq("password", password).execute()
     return len(result.data) > 0
+
 
 # ======== Utils ========
 def img_to_base64(file_path):
