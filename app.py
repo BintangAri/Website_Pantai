@@ -36,10 +36,10 @@ penjelasan_pantai = {
 
 # ======== Database ========
 DB_CONFIG = {
-    "host": os.environ.get("postgresql://postgres:Bintang251003@db.bnwcvpofpgtcjnotzdte.supabase.co:5432/postgres"),
+    "host": os.environ.get("db.bnwcvpofpgtcjnotzdte.supabase.co"),
     "port": os.environ.get("5432"),
-    "dbname": os.environ.get("postgsre"),
-    "user": os.environ.get("postgsre"),
+    "dbname": os.environ.get("postgres"),
+    "user": os.environ.get("postgres"),
     "password": os.environ.get("Bintang251003")
 }
 def get_connection():
