@@ -153,7 +153,7 @@ def halaman_klasifikasi():
 
     @st.cache_resource
     def load_model():
-        return tf.keras.models.load_model("modeltrial_1_lr0.0001_drop0.3.h5")
+        return tf.keras.models.load_model("modeltrial_1_lr0.0001_drop0.3.keras")
 
     model = load_model()
     class_names = ['Pantai Family', 'Pantai Surfing', 'Pantai Snorkeling']
