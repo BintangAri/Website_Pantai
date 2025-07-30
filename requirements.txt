@@ -1,7 +1,8 @@
-streamlit
-tensorflow==2.10.0
-keras==2.10.0
-protobuf==3.19.6
-numpy<2.0
-pillow
-supabase
+streamlit==1.35.0
+tensorflow==2.12.0
+Pillow>=9.0.0
+numpy>=1.23.0
+python-dotenv>=1.0.0
+supabase>=1.0.3
+postgrest>=0.10.6
+h5py>=3.7.0
