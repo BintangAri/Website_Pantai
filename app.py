@@ -232,18 +232,18 @@ def halaman_penjelasan():
         st.markdown("### Pilih kategori pantai untuk melihat penjelasannya:")
         for kategori, info in gambar_dict.items():
             base64_img = img_to_base64(info["file"])
-            with st.form(key=kategori):
-                st.markdown(
-                    f"""
-                    <div style="text-align: center; margin-bottom: 10px;">
-                        <img src="data:image/png;base64,{base64_img}"
-                             style="border: 4px solid #555; border-radius: 8px;
-                             width: 300px; height: 200px; object-fit: cover;" />
-                    </div>
-                    """, unsafe_allow_html=True)
-                if st.form_submit_button(info["caption"]):
-                    st.session_state["kategori_terpilih"] = kategori
-                    st.experimental_rerun()
+            st.markdown(
+                f"""
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <img src="data:image/png;base64,{base64_img}"
+                         style="border: 4px solid #555; border-radius: 8px;
+                         width: 300px; height: 200px; object-fit: cover;" />
+                </div>
+                """, unsafe_allow_html=True)
+            if st.button(info["caption"], key=kategori):
+                st.session_state["kategori_terpilih"] = kategori
+                st.experimental_rerun()
+
     else:
         kategori = st.session_state["kategori_terpilih"]
         info = gambar_dict[kategori]
