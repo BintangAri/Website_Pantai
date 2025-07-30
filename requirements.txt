@@ -6,3 +6,4 @@ python-dotenv>=1.0.0
 supabase>=1.0.3
 postgrest>=0.10.6
 h5py>=3.7.0
+gdown

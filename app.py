@@ -153,8 +153,14 @@ def halaman_klasifikasi():
 
     @st.cache_resource
     def load_model():
-        return tf.keras.models.load_model("modeljadi_1_lr0.0001_drop0.3.h5", compile=False)
-    model = load_model()
+        model_path = "modeljadi_1_lr0.0001_drop0.3.h5"
+        gdrive_id = "1iBRcD_IGIJy6jG9J09zp4-8NkW_LbVyD"
+        url = f"https://drive.google.com/uc?id={gdrive_id}"
+
+    if not os.path.exists(model_path):
+        gdown.download(url, model_path, quiet=False)
+    
+    return tf.keras.models.load_model(model_path, compile=False)
     class_names = ['Pantai Family', 'Pantai Surfing', 'Pantai Snorkeling']
     rekomendasi_tempat = {
         'Pantai Family': ['Pantai Sanur', 'Pantai Nusa Dua', 'Pantai Pandawa'],
