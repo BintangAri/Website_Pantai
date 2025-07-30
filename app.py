@@ -146,6 +146,12 @@ def halaman_utama():
             terbaik di Bali sesuai dengan kategori tersebut.
         </div>
     """, unsafe_allow_html=True)
+    st.markdown("### 🔍 Fitur Utama:")
+    st.markdown("""
+    - 📷 <b>Klasifikasi Pantai</b>: Upload foto pantai untuk mengetahui kategorinya (Family, Surfing, atau Snorkeling).
+    - 📍 <b>Rekomendasi Lokasi</b>: Dapatkan pantai terbaik sesuai kategori, lengkap dengan tautan Google Maps.
+    - ℹ️ <b>Informasi Pantai</b>: Pelajari lebih lanjut tentang setiap kategori pantai melalui gambar dan deskripsi.
+    """, unsafe_allow_html=True)
 
 # ======== Halaman Klasifikasi Pantai ========
 def halaman_klasifikasi():
@@ -269,7 +275,7 @@ if st.session_state["gapura_open"]:
 if st.session_state["logged_in"]:
     with st.sidebar:
         st.markdown(f"👤 **{st.session_state['username']}**")
-        halaman = st.radio("Navigasi", ["🏠 Beranda", "📷 Klasifikasi"])
+        halaman = st.radio("Navigasi", ["🏠 Beranda", "📷 Klasifikasi", "ℹ️ Penjelasan"])
         if st.button("🚪 Logout"):
             st.session_state["logged_in"] = False
             st.session_state["username"] = ""
@@ -279,6 +285,8 @@ if st.session_state["logged_in"]:
         halaman_utama()
     elif halaman == "📷 Klasifikasi":
         halaman_klasifikasi()
+    elif halaman == "ℹ️ Penjelasan":
+        halaman_penjelasan()
 else:
     if st.session_state["page"] == "login":
         halaman_login()
