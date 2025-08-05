@@ -17,3 +17,5 @@ Login dan registrasi pengguna menggunakan Supabase
 Visualisasi dan penjelasan edukatif tiap kategori
 
 Model dilatih menggunakan dataset gambar pantai berlabel dan disimpan dalam format SavedModel.
+
+Foto Testing: https://drive.google.com/drive/folders/1gmJNCtacweUUoto1n6NETXo3fYlht_je
